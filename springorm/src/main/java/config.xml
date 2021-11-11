@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context.xsd
+ http://www.springframework.org/schema/tx
+ http://www.springframework.org/schema/tx/spring-tx.xsd">
+	
+	<tx:annotation-driven/>
+
+	<!-- 3.1.2 -->
+	<bean
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource" name="ds">
+		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/springjdbc" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+
+	</bean>
+
+	<!-- 3 -->
+	<bean class="org.springframework.orm.hibernate5.LocalSessionFactoryBean" name="factory">
+
+		<!-- 3.1.1 data source -->
+		<property name="dataSource" ref="ds"></property>
+		
+		<!--3.2 hibernate property -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		
+		<!--3.3 annotated classes -->
+		<property name="annotatedClasses">
+			<list>
+				<value>com.spring.orm.entities.Student</value>
+			</list>
+		</property>
+
+	</bean>
+
+	<!-- 2 1-->
+	<bean class="org.springframework.orm.hibernate5.HibernateTemplate" name="hibernateTemplate">
+		<property name="sessionFactory" ref="factory"></property>
+	</bean>
+	
+	<!-- 1 -->
+	<bean class="com.spring.orm.dao.StudentDao" name="studentDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate"></property>
+	</bean>
+	
+	<!-- without it's:- write operation are not allowed in read-only mode. 
+	without this bean this is read only ,but if we declare this bean it's read and write both.
+	and you have to add an annotation on inside your dao method @Transactional
+	and also add scema for tx
+	and throw:- No bean named 'transactionManager' available: -->
+	
+	<!-- 2 2-->
+ 	<bean class="org.springframework.orm.hibernate5.HibernateTransactionManager" name="transactionManager">
+		<property name="sessionFactory" ref="factory"></property>
+	</bean> 
+
+</beans>
